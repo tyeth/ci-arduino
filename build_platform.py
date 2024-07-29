@@ -154,7 +154,7 @@ def install_platform(fqbn, full_platform_name=None):
         manually_install_esp32_bsp(full_platform_name[2]) # build esp32 bsp from desired source and branch
     for retry in range(0, 3):
         print("arduino-cli core install "+fqbn+" --additional-urls "+BSP_URLS)
-        if subprocess.run("arduino-cli core install "+fqbn+" --additional-urls "+BSP_URLS+" > /dev/null", shell=True).returncode == 0:
+        if subprocess.run("arduino-cli core install "+fqbn+" --additional-urls "+BSP_URLS+" > /dev/null", shell=True, check=False).returncode == 0:
             break
         print("...retrying...", end=" ")
         time.sleep(10) # wait 10 seconds then try again?
