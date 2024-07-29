@@ -339,8 +339,8 @@ def group_output(title):
 
 
 def extract_dependencies(output):
-    library_pattern = re.compile(r'^([A-Za-z0-9\s_-]+)\s+([0-9.]+)\s+(.+)$', re.MULTILINE)
-    platform_pattern = re.compile(r'^Used platform\s+([\w:]+)\s+([0-9.]+)\s+(.+)$', re.MULTILINE)
+    library_pattern = re.compile(r'^\s*([\w\s-]+)\s+([\d\.]+(?:-[\w\.]+)?)\s+(.+)$')
+    platform_pattern = re.compile(r'^Used platform\s+([\w:]+)\s+([\d\.]+)\s+(.+)$')
     
     libraries = library_pattern.findall(output)
     platforms = platform_pattern.findall(output)
