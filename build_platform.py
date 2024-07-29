@@ -112,7 +112,7 @@ def manually_install_esp32_bsp(repo_info):
     # Assemble git url
     repo_url = "git clone -b {0} https://github.com/{1}/arduino-esp32.git esp32".format(repo_info.split("/")[1], repo_info.split("/")[0])
     # Locally clone repo (https://docs.espressif.com/projects/arduino-esp32/en/latest/installing.html#linux)
-    os.system("mkdir -p /home/runner/Arduino/hardware/espressif")
+    subprocess.run("mkdir -p /home/runner/Arduino/hardware/espressif", shell=True, check=True)
     print("Cloning %s"%repo_url)
     cmd = "cd /home/runner/Arduino/hardware/espressif && " + repo_url
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
@@ -154,7 +154,7 @@ def install_platform(fqbn, full_platform_name=None):
         manually_install_esp32_bsp(full_platform_name[2]) # build esp32 bsp from desired source and branch
     for retry in range(0, 3):
         print("arduino-cli core install "+fqbn+" --additional-urls "+BSP_URLS)
-        if os.system("arduino-cli core install "+fqbn+" --additional-urls "+BSP_URLS+" > /dev/null") == 0:
+        if subprocess.run("arduino-cli core install "+fqbn+" --additional-urls "+BSP_URLS+" > /dev/null", shell=True).returncode == 0:
             break
         print("...retrying...", end=" ")
         time.sleep(10) # wait 10 seconds then try again?
@@ -164,14 +164,16 @@ def install_platform(fqbn, full_platform_name=None):
         exit(-1)
     ColorPrint.print_pass(CHECK)
     # print installed core version
-    print(os.popen('arduino-cli core list | grep {}'.format(fqbn)).read(), end='')
+    result = subprocess.Popen('arduino-cli core list | grep {}'.format(fqbn), shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    print(result.stdout.read().decode(), end='')
+
 
 
 def run_or_die(cmd, error):
     print(cmd)
     attempt = 0
     while attempt < 3:
-        if os.system(cmd) == 0:
+        if subprocess.run(cmd, shell=True, check=False).returncode == 0:
             return
         attempt += 1
         print('attempt {} failed, {} retry left'.format(attempt, 3-attempt))
@@ -466,7 +468,7 @@ def test_examples_in_folder(platform, folderpath):
                         os.makedirs(BUILD_DIR + "/build", exist_ok=True)
                         os.makedirs(BUILD_DIR + "/build/" + fqbnpath, exist_ok=True)
                         shutil.copy(filename, BUILD_DIR + "/build/" + fqbnpath + "-" + uf2file)
-                        os.system("ls -lR " + BUILD_DIR + "/build")
+                        subprocess.run("ls -lR " + BUILD_DIR + "/build", shell=True, check=True)
         else:
             ColorPrint.print_fail(CROSS)
             with group_output(f"{example} {fqbn} built output"):
