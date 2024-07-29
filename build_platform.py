@@ -56,9 +56,6 @@ elif "METROX-Examples-and-Project-Sketches" in BUILD_DIR:
     print("Found MetroX Examples Repo")
     IS_LEARNING_SYS = True
 
-#os.system('pwd')
-#os.system('ls -lA')
-
 CROSS = u'\N{cross mark}'
 CHECK = u'\N{check mark}'
 
@@ -327,27 +324,58 @@ def group_output(title):
         sys.stdout.flush()
 
 
+def extract_dependencies(output):
+    library_pattern = re.compile(r'^([A-Za-z0-9\s_-]+)\s+([0-9.]+)\s+(.+)$', re.MULTILINE)
+    platform_pattern = re.compile(r'^Used platform\s+([\w:]+)\s+([0-9.]+)\s+(.+)$', re.MULTILINE)
+    
+    libraries = library_pattern.findall(output)
+    platforms = platform_pattern.findall(output)
+    
+    dependencies = {
+        'libraries': libraries,
+        'platforms': platforms
+    }
+    
+    return dependencies
+
+def write_dependencies_to_header(dependencies, output_file):
+    with open(output_file, 'w') as f:
+        f.write('#ifndef PROJECT_DEPENDENCIES_H\n')
+        f.write('#define PROJECT_DEPENDENCIES_H\n\n')
+        f.write('const char* project_dependencies = R"(\n')
+        
+        f.write('Libraries and Versions:\n')
+        for lib in dependencies['libraries']:
+            f.write(f'Library: {lib[0].strip()}, Version: {lib[1].strip()}, Folder: {lib[2].strip()}\n')
+        
+        f.write('\nPlatforms and Versions:\n')
+        for plat in dependencies['platforms']:
+            f.write(f'Platform: {plat[0].strip()}, Version: {plat[1].strip()}, Folder: {plat[2].strip()}\n')
+        
+        f.write(')";\n\n')
+        f.write('#endif // PROJECT_DEPENDENCIES_H\n')
+
 def test_examples_in_folder(platform, folderpath):
     global success
     fqbn = ALL_PLATFORMS[platform][0]
     for example in sorted(os.listdir(folderpath)):
-        examplepath = folderpath+"/"+example
+        examplepath = folderpath + "/" + example
         if os.path.isdir(examplepath):
             test_examples_in_folder(platform, examplepath)
             continue
         if not examplepath.endswith(".ino"):
             continue
 
-        print('\t'+example, end=' ')
+        print('\t' + example, end=' ')
 
         # check if we should SKIP
-        skipfilename = folderpath+"/."+platform+".test.skip"
-        onlyfilename = folderpath+"/."+platform+".test.only"
+        skipfilename = folderpath + "/." + platform + ".test.skip"
+        onlyfilename = folderpath + "/." + platform + ".test.only"
         # check if we should GENERATE UF2
-        gen_file_name = folderpath+"/."+platform+".generate"
+        gen_file_name = folderpath + "/." + platform + ".generate"
 
         # .skip txt include all skipped platforms, one per line
-        skip_txt = folderpath+"/.skip.txt"
+        skip_txt = folderpath + "/.skip.txt"
 
         is_skip = False
         if os.path.exists(skipfilename):
@@ -363,10 +391,10 @@ def test_examples_in_folder(platform, folderpath):
             ColorPrint.print_warn("skipping")
             continue
 
-        if glob.glob(folderpath+"/.*.test.only"):
-            platformname = glob.glob(folderpath+"/.*.test.only")[0].split('.')[1]
-            if platformname != "none" and not platformname in ALL_PLATFORMS:
-                # uh oh, this isnt a valid testonly!
+        if glob.glob(folderpath + "/.*.test.only"):
+            platformname = glob.glob(folderpath + "/.*.test.only")[0].split('.')[1]
+            if platformname != "none" and platformname not in ALL_PLATFORMS:
+                # uh oh, this isn't a valid testonly!
                 ColorPrint.print_fail(CROSS)
                 ColorPrint.print_fail("This example does not have a valid .platform.test.only file")
                 success = 1
@@ -384,8 +412,7 @@ def test_examples_in_folder(platform, folderpath):
                 cmd = ['arduino-cli', 'compile', '--warnings', 'all', '--fqbn', fqbn, folderpath]
         else:
             cmd = ['arduino-cli', 'compile', '--warnings', 'none', '--export-binaries', '--fqbn', fqbn, folderpath]
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                                stderr=subprocess.PIPE)
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
             if BUILD_TIMEOUT:
                 out, err = proc.communicate(timeout=popen_timeout)
@@ -413,10 +440,13 @@ def test_examples_in_folder(platform, folderpath):
                         success = 1  # failure
                     if IS_LEARNING_SYS:
                         fqbnpath, uf2file = filename.split("/")[-2:]
-                        os.makedirs(BUILD_DIR+"/build", exist_ok=True)
-                        os.makedirs(BUILD_DIR+"/build/"+fqbnpath, exist_ok=True)
-                        shutil.copy(filename, BUILD_DIR+"/build/"+fqbnpath+"-"+uf2file)
-                        os.system("ls -lR "+BUILD_DIR+"/build")
+                        os.makedirs(BUILD_DIR + "/build", exist_ok=True)
+                        os.makedirs(BUILD_DIR + "/build/" + fqbnpath, exist_ok=True)
+                        shutil.copy(filename, BUILD_DIR + "/build/" + fqbnpath + "-" + uf2file)
+                        os.system("ls -lR " + BUILD_DIR + "/build")
+            # Extract dependencies and write to header for the first successful example
+            dependencies = extract_dependencies(out.decode() + err.decode())
+            write_dependencies_to_header(dependencies, os.path.join(BUILD_DIR, platform + '_dependencies.h'))
         else:
             ColorPrint.print_fail(CROSS)
             with group_output(f"{example} {fqbn} built output"):
@@ -447,14 +477,13 @@ def main():
     for platform in platforms:
         fqbn = ALL_PLATFORMS[platform][0]
         print('#'*80)
-        ColorPrint.print_info("SWITCHING TO "+fqbn)
+        ColorPrint.print_info("SWITCHING TO " + fqbn)
         install_platform(":".join(fqbn.split(':', 2)[0:2]), ALL_PLATFORMS[platform]) # take only first two elements
         print('#'*80)
         if not IS_LEARNING_SYS:
-            test_examples_in_folder(platform, BUILD_DIR+"/examples")
+            test_examples_in_folder(platform, BUILD_DIR + "/examples")
         else:
             test_examples_in_folder(platform, BUILD_DIR)
-
 
 if __name__ == "__main__":
     main()
