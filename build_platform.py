@@ -143,10 +143,11 @@ def manually_install_esp32_bsp(repo_info):
 
 
 def install_platform(fqbn, full_platform_name=None):
+    print("Checking for drazzy.json (before moving)")
     if os.path.exists("/home/runner/.arduino15/package_drazzy.json"):
         print("Moving drazzy.json")
         shutil.move("/home/runner/.arduino15/package_drazzy.json", "/home/runner/.arduino15/package_drazzy.com_index.json")
-    print("Installing", fqbn, end=" ")
+    print("Installing", fqbn, " (", full_platform_name, ")", end=" ")
     if fqbn == "adafruit:avr":   # we have a platform dep
         install_platform("arduino:avr", full_platform_name)
     if full_platform_name[2] is not None:
