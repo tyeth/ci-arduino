@@ -427,7 +427,8 @@ def test_examples_in_folder(platform, folderpath):
         if PRINT_DEPENDENCIES_AS_HEADER:
             cmd.append('--only-compilation-database')
         elif INCLUDE_PRINT_DEPENDENCIES_HEADER:
-            cmd.append('--build-properties "compiler.cpp.extra_flags=-include ' + BUILD_DIR + '/build/print_dependencies.h"')
+            cmd.append('--build-properties')
+            cmd.append('"compiler.cpp.extra_flags=-include ' + BUILD_DIR + '/build/print_dependencies.h"')
 
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
