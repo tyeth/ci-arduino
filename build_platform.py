@@ -29,6 +29,12 @@ if "--build_timeout" in sys.argv:
     sys.argv.pop(sys.argv.index("--build_timeout") + 1)
     sys.argv.remove("--build_timeout")
 
+# optional wippersnapper argument to generate a dependencies header file
+PRINT_DEPENDENCIES_AS_HEADER = False
+if "--print_dependencies_as_header" in sys.argv:
+    PRINT_DEPENDENCIES_AS_HEADER = True
+    sys.argv.remove("--print_dependencies_as_header")
+
 # add user bin to path!
 BUILD_DIR = ''
 # add user bin to path!
@@ -412,6 +418,8 @@ def test_examples_in_folder(platform, folderpath):
                 cmd = ['arduino-cli', 'compile', '--warnings', 'all', '--fqbn', fqbn, folderpath]
         else:
             cmd = ['arduino-cli', 'compile', '--warnings', 'none', '--export-binaries', '--fqbn', fqbn, folderpath]
+        if PRINT_DEPENDENCIES_AS_HEADER:
+            cmd.append('--only-compilation-database')
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
             if BUILD_TIMEOUT:
@@ -430,7 +438,11 @@ def test_examples_in_folder(platform, folderpath):
                 # also print out warning message
                 with group_output(f"{example} {fqbn} build output"):
                     ColorPrint.print_fail(err.decode("utf-8"))
-            if os.path.exists(gen_file_name):
+            if PRINT_DEPENDENCIES_AS_HEADER:
+                # Extract dependencies and write to header for the first successful example
+                dependencies = extract_dependencies(out.decode() + err.decode())
+                write_dependencies_to_header(dependencies, os.path.join(BUILD_DIR, platform + '_dependencies.h'))
+            elif os.path.exists(gen_file_name):
                 if ALL_PLATFORMS[platform][1] is None:
                     ColorPrint.print_info("Platform does not support UF2 files, skipping...")
                 else:
@@ -444,9 +456,6 @@ def test_examples_in_folder(platform, folderpath):
                         os.makedirs(BUILD_DIR + "/build/" + fqbnpath, exist_ok=True)
                         shutil.copy(filename, BUILD_DIR + "/build/" + fqbnpath + "-" + uf2file)
                         os.system("ls -lR " + BUILD_DIR + "/build")
-            # Extract dependencies and write to header for the first successful example
-            dependencies = extract_dependencies(out.decode() + err.decode())
-            write_dependencies_to_header(dependencies, os.path.join(BUILD_DIR, platform + '_dependencies.h'))
         else:
             ColorPrint.print_fail(CROSS)
             with group_output(f"{example} {fqbn} built output"):
