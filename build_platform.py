@@ -452,6 +452,7 @@ def test_examples_in_folder(platform, folderpath):
         elif INCLUDE_PRINT_DEPENDENCIES_HEADER:
             cmd.append('--build-property')
             cmd.append('"build.extra_flags=\'-DPRINT_DEPENDENCIES\'"')
+            cmd.append('--verbose')
 
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
