@@ -184,7 +184,8 @@ def run_or_die(cmd, error):
 
 def is_library_installed(lib_name):
     try:
-        installed_libs = subprocess.check_output(["arduino-cli", "lib", "list"]).decode("utf-8")
+        installed_libs = subprocess.check_output(["arduino-cli", "lib", "list"], shell=True).decode("utf-8")
+        print("Installed libraries:", installed_libs)
         return not all(not item for item in [re.match('^'+lib_name+'\\s*\\d+\\.', line) for line in installed_libs.split('\n')])
     except subprocess.CalledProcessError as e:
         print("Error checking installed libraries:", e)
@@ -305,7 +306,7 @@ def generate_uf2(platform, fqbn, example_path):
         family_id = ALL_PLATFORMS[platform][1]
         cmd = ['python3', 'uf2conv.py', input_file, '-c', '-f', family_id, '-b', "0x0000", '-o', output_file]
 
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
     if BUILD_TIMEOUT:
         r = proc.wait(timeout=popen_timeout)
     else:
@@ -435,7 +436,7 @@ def test_examples_in_folder(platform, folderpath):
             cmd.append('--build-properties')
             cmd.append('"compiler.cpp.extra_flags=-include ' + BUILD_DIR + '/build/print_dependencies.h"')
 
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         try:
             if BUILD_TIMEOUT:
                 out, err = proc.communicate(timeout=popen_timeout)
