@@ -31,10 +31,10 @@ if "--build_timeout" in sys.argv:
 
 # optional wippersnapper argument to generate a dependencies header file
 PRINT_DEPENDENCIES_AS_HEADER = False
-if "--print_dependencies_as_header" in sys.argv:
-    PRINT_DEPENDENCIES_AS_HEADER = True
-    sys.argv.remove("--print_dependencies_as_header")
-
+# if "--print_dependencies_as_header" in sys.argv:
+#     PRINT_DEPENDENCIES_AS_HEADER = True
+#     sys.argv.remove("--print_dependencies_as_header")
+#
 INCLUDE_PRINT_DEPENDENCIES_HEADER = False
 if "--include_print_dependencies_header" in sys.argv:
     INCLUDE_PRINT_DEPENDENCIES_HEADER = True
@@ -496,9 +496,8 @@ def main():
             print("Unknown platform: ", arg)
             exit(-1)
 
-    if not INCLUDE_PRINT_DEPENDENCIES_HEADER: # don't run second time
-        # Install libraries deps
-        install_library_deps()
+    # Install libraries deps
+    install_library_deps()
 
     for platform in platforms:
         fqbn = ALL_PLATFORMS[platform][0]
@@ -507,7 +506,15 @@ def main():
         install_platform(":".join(fqbn.split(':', 2)[0:2]), ALL_PLATFORMS[platform]) # take only first two elements
         print('#'*80)
         if not IS_LEARNING_SYS:
-            test_examples_in_folder(platform, BUILD_DIR + "/examples")
+            if INCLUDE_PRINT_DEPENDENCIES_HEADER:
+                PRINT_DEPENDENCIES_AS_HEADER = True
+                INCLUDE_PRINT_DEPENDENCIES_HEADER = False
+                test_examples_in_folder(platform, BUILD_DIR + "/examples")
+                PRINT_DEPENDENCIES_AS_HEADER = False
+                INCLUDE_PRINT_DEPENDENCIES_HEADER = True
+                test_examples_in_folder(platform, BUILD_DIR + "/examples")
+            else:
+                test_examples_in_folder(platform, BUILD_DIR + "/examples")
         else:
             test_examples_in_folder(platform, BUILD_DIR)
 
