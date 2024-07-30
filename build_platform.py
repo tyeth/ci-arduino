@@ -352,7 +352,7 @@ def extract_dependencies(output):
         'libraries': libraries,
         'platforms': platforms
     }
-    
+    print("Extracted dependencies:", dependencies)
     return dependencies
 
 def write_dependencies_to_header(dependencies, output_file):
