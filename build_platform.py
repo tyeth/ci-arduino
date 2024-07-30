@@ -184,7 +184,7 @@ def run_or_die(cmd, error):
 
 def is_library_installed(lib_name):
     try:
-        installed_libs = subprocess.check_output(["arduino-cli", "lib", "list"], shell=True).decode("utf-8")
+        installed_libs = subprocess.check_output("arduino-cli lib list", shell=True).decode("utf-8")
         print("Installed libraries:", installed_libs)
         return not all(not item for item in [re.match('^'+lib_name+'\\s*\\d+\\.', line) for line in installed_libs.split('\n')])
     except subprocess.CalledProcessError as e:
