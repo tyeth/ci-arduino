@@ -299,6 +299,7 @@ def generate_uf2(platform, fqbn, example_path):
         family_id = ALL_PLATFORMS[platform][1]
         cmd = ['python3', 'uf2conv.py', hex_input_file, '-c', '-f', family_id, '-o', output_file]
     else:
+        ColorPrint.print_info(subprocess.check_output(["ls", "-lR", "build/"]))
         cli_build_path = "build/*.*." + fqbn.split(':')[2] + "/*.ino.bin"
         input_file = glob1(os.path.join(example_path, cli_build_path))
         output_file = os.path.splitext(input_file)[0] + ".uf2"
