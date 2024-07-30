@@ -354,22 +354,28 @@ def extract_dependencies(output):
             if re.match(r'Used library', line):
                 IS_LIBS_FOUND = True
                 print("Found libraries token using regex")
-                print("find Version:", str.find(line, 'Version'))
-                print("find Path:", str.find(line, 'Path'))
-                COLS = [0,str.find(line, 'Version'), str.find(line, 'Path')]
+                print("find Version:", line.find(line, 'Version'))
+                print("find Path:", line.find(line, 'Path'))
+                COLS = [0,line.find('Version'), line.find('Path')]
                 continue
             else:
-                if str.find("Used library", line) != -1:
+                if line.find("Used library") != -1:
                     print("Found libraries token using find")
                     IS_LIBS_FOUND = True
-                    print("non regex find Version:", str.find(line, 'Version'))
-                    print("find Path:", str.find(line, 'Path'))
-                    COLS = [0,str.find(line, 'Version'), str.find(line, 'Path')]
+                    print("non regex find Version:", line.find('Version'))
+                    print("find Path:", line.find('Path'))
+                    COLS = [0,line.find('Version'), line.find('Path')]
         else:
             if not IS_BSP_FOUND:
                 if re.match(r'Used platform', line):
+                    print("Found platform token using regex")
                     IS_BSP_FOUND = True
-                    COLS = [0,str.find(line, 'Version'), str.find(line, 'Path')]
+                    COLS = [0,line.find('Version'), line.find('Path')]
+                    continue
+                elif line.find("Used platform") != -1:
+                    print("Found platform token using find")
+                    IS_BSP_FOUND = True
+                    COLS = [0,line.find('Version'), line.find('Path')]
                     continue
                 else:
                     libraries.append([line[:COLS[1]].strip(),line[COLS[1]:COLS[2]].strip()])
@@ -460,6 +466,7 @@ def test_examples_in_folder(platform, folderpath):
 
         if PRINT_DEPENDENCIES_AS_HEADER:
             cmd.append('--only-compilation-database')
+            cmd.append('--no-color')
         elif INCLUDE_PRINT_DEPENDENCIES_HEADER:
             cmd.append('--build-property')
             cmd.append('"build.extra_flags=\'-DPRINT_DEPENDENCIES\'"')
