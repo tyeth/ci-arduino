@@ -436,7 +436,7 @@ def test_examples_in_folder(platform, folderpath):
             cmd.append('--build-property')
             cmd.append('"build.extra_flags=\'-DPRINT_DEPENDENCIES\'"')
 
-        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+        proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         try:
             if BUILD_TIMEOUT:
                 out, err = proc.communicate(timeout=popen_timeout)
