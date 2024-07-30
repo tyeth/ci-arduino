@@ -339,6 +339,8 @@ def group_output(title):
 
 
 def extract_dependencies(output):
+    print("Extracting libraries from output:", output)
+    print(f"{"# Done #":-^80}")
     library_pattern = re.compile(r'^\s*([\w\s-]+)\s+([\d\.]+(?:-[\w\.]+)?)\s+(.+)$')
     platform_pattern = re.compile(r'^Used platform\s+([\w:]+)\s+([\d\.]+)\s+(.+)$')
     
