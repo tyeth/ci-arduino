@@ -373,7 +373,7 @@ def write_dependencies_to_header(dependencies, output_file):
         f.write('#endif // PROJECT_DEPENDENCIES_H\n')
 
 def test_examples_in_folder(platform, folderpath):
-    global success
+    global success, BUILD_TIMEOUT, popen_timeout, BUILD_WALL, BUILD_WARN, PRINT_DEPENDENCIES_AS_HEADER, INCLUDE_PRINT_DEPENDENCIES_HEADER, IS_LEARNING_SYS, BUILD_DIR
     fqbn = ALL_PLATFORMS[platform][0]
     for example in sorted(os.listdir(folderpath)):
         examplepath = folderpath + "/" + example
@@ -481,6 +481,7 @@ def test_examples_in_folder(platform, folderpath):
 
 
 def main():
+    global INCLUDE_PRINT_DEPENDENCIES_HEADER, PRINT_DEPENDENCIES_AS_HEADER
     # Test platforms
     platforms = []
 
