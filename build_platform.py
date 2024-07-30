@@ -455,7 +455,7 @@ def test_examples_in_folder(platform, folderpath):
                     ColorPrint.print_fail(err.decode("utf-8"))
             if PRINT_DEPENDENCIES_AS_HEADER:
                 # Extract dependencies and write to header for the first successful example
-                dependencies = extract_dependencies(out.decode() + err.decode())
+                dependencies = extract_dependencies(out.decode("utf-8") + err.decode("utf-8"))
                 write_dependencies_to_header(dependencies, os.path.join(BUILD_DIR, 'print_dependencies.h'))
             elif os.path.exists(gen_file_name):
                 if ALL_PLATFORMS[platform][1] is None:
@@ -495,8 +495,9 @@ def main():
             print("Unknown platform: ", arg)
             exit(-1)
 
-    # Install libraries deps
-    install_library_deps()
+    if not INCLUDE_PRINT_DEPENDENCIES_HEADER: # don't run second time
+        # Install libraries deps
+        install_library_deps()
 
     for platform in platforms:
         fqbn = ALL_PLATFORMS[platform][0]
