@@ -341,12 +341,29 @@ def group_output(title):
 
 def extract_dependencies(output):
     print("Extracting libraries from output:", output)
-    print(f"{"# Done #":-^80}")
-    library_pattern = re.compile(r'^\s*([\w\s-]+)\s+([\d\.]+(?:-[\w\.]+)?)\s+(.+)$')
-    platform_pattern = re.compile(r'^Used platform\s+([\w:]+)\s+([\d\.]+)\s+(.+)$')
-    
-    libraries = library_pattern.findall(output)
-    platforms = platform_pattern.findall(output)
+    print(f"{"############## Done #############":-^80}")
+
+    IS_LIBS_FOUND = False
+    IS_BSP_FOUND = False
+    libraries = []
+    platforms = []
+    COLS = []
+    for line in output.split('\n'):
+        if not IS_LIBS_FOUND:
+            if re.match(r'^Used library', line):
+                IS_LIBS_FOUND = True
+                COLS = [0,str.find(line, 'Version'), str.find(line, 'Path')]
+                break
+        else:
+            if not IS_BSP_FOUND:
+                if re.match(r'^Used platform', line):
+                    IS_BSP_FOUND = True
+                    COLS = [0,str.find(line, 'Version'), str.find(line, 'Path')]
+                    break
+                else:
+                    libraries.append((line[:COLS[1]].strip(),line[COLS[1]:COLS[2]].strip()))
+            else:
+                platforms.append((line[:COLS[1]].strip(),line[COLS[1]:COLS[2]].strip()))
     
     dependencies = {
         'libraries': libraries,
