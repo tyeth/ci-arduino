@@ -299,14 +299,14 @@ def generate_uf2(platform, fqbn, example_path):
         family_id = ALL_PLATFORMS[platform][1]
         cmd = ['python3', 'uf2conv.py', hex_input_file, '-c', '-f', family_id, '-o', output_file]
     else:
-        ColorPrint.print_info(subprocess.check_output(["tree"]).decode("utf-8"))
+        # ColorPrint.print_info(subprocess.check_output(["tree"]).decode("utf-8"))
         cli_build_path = "build/*.*." + fqbn.split(':')[2] + "/*.ino.bin"
         input_file = glob1(os.path.join(example_path, cli_build_path))
         output_file = os.path.splitext(input_file)[0] + ".uf2"
         family_id = ALL_PLATFORMS[platform][1]
         cmd = ['python3', 'uf2conv.py', input_file, '-c', '-f', family_id, '-b', "0x0000", '-o', output_file]
 
-    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
+    proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if BUILD_TIMEOUT:
         r = proc.wait(timeout=popen_timeout)
     else:
