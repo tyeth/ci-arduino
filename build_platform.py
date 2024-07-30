@@ -349,7 +349,8 @@ def extract_dependencies(output):
     platforms = []
     COLS = []
     for i,line in enumerate(output.split('\n')):
-        print(i,": ",line)
+        if line.strip() == '':
+            continue
         if not IS_LIBS_FOUND:
             if re.match(r'Used library', line):
                 IS_LIBS_FOUND = True
