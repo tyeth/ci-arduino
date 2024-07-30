@@ -361,15 +361,15 @@ def extract_dependencies(output):
                     COLS = [0,str.find(line, 'Version'), str.find(line, 'Path')]
                     break
                 else:
-                    libraries.append((line[:COLS[1]].strip(),line[COLS[1]:COLS[2]].strip()))
+                    libraries.append([line[:COLS[1]].strip(),line[COLS[1]:COLS[2]].strip()])
             else:
-                platforms.append((line[:COLS[1]].strip(),line[COLS[1]:COLS[2]].strip()))
+                platforms.append([line[:COLS[1]].strip(),line[COLS[1]:COLS[2]].strip()])
     
     dependencies = {
         'libraries': libraries,
         'platforms': platforms
     }
-    print("Extracted dependencies:", dependencies)
+    print("Extracted list of dependencies:", dependencies)
     return dependencies
 
 def write_dependencies_to_header(dependencies, output_file):
@@ -380,11 +380,11 @@ def write_dependencies_to_header(dependencies, output_file):
         
         f.write('Libraries and Versions:\n')
         for lib in dependencies['libraries']:
-            f.write(f'Library: {lib[0].strip()}, Version: {lib[1].strip()}, Folder: {lib[2].strip()}\n')
+            f.write(f'Library: {lib[0].strip()}, Version: {lib[1].strip()}\n')
         
         f.write('\nPlatforms and Versions:\n')
         for plat in dependencies['platforms']:
-            f.write(f'Platform: {plat[0].strip()}, Version: {plat[1].strip()}, Folder: {plat[2].strip()}\n')
+            f.write(f'Platform: {plat[0].strip()}, Version: {plat[1].strip()}\n')
         
         f.write(')";\n\n')
         f.write('#endif // PROJECT_DEPENDENCIES_H\n')
