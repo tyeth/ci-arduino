@@ -348,12 +348,23 @@ def extract_dependencies(output):
     libraries = []
     platforms = []
     COLS = []
-    for line in output.split('\n'):
+    for i,line in enumerate(output.split('\n')):
+        print(i,": ",line)
         if not IS_LIBS_FOUND:
             if re.match(r'Used library', line):
                 IS_LIBS_FOUND = True
+                print("Found libraries token using regex")
+                print("find Version:", str.find(line, 'Version'))
+                print("find Path:", str.find(line, 'Path'))
                 COLS = [0,str.find(line, 'Version'), str.find(line, 'Path')]
                 continue
+            else:
+                if str.find("Used library", line) != -1:
+                    print("Found libraries token using find")
+                    IS_LIBS_FOUND = True
+                    print("non regex find Version:", str.find(line, 'Version'))
+                    print("find Path:", str.find(line, 'Path'))
+                    COLS = [0,str.find(line, 'Version'), str.find(line, 'Path')]
         else:
             if not IS_BSP_FOUND:
                 if re.match(r'Used platform', line):
