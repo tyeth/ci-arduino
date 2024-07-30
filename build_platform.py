@@ -354,8 +354,8 @@ def extract_dependencies(output):
             if re.match(r'Used library', line):
                 IS_LIBS_FOUND = True
                 print("Found libraries token using regex")
-                print("find Version:", line.find(line, 'Version'))
-                print("find Path:", line.find(line, 'Path'))
+                print("find Version:", line.find('Version'))
+                print("find Path:", line.find('Path'))
                 COLS = [0,line.find('Version'), line.find('Path')]
                 continue
             else:
