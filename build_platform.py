@@ -350,13 +350,13 @@ def extract_dependencies(output):
     COLS = []
     for line in output.split('\n'):
         if not IS_LIBS_FOUND:
-            if re.match(r'^Used library', line):
+            if re.match(r'Used library', line):
                 IS_LIBS_FOUND = True
                 COLS = [0,str.find(line, 'Version'), str.find(line, 'Path')]
                 break
         else:
             if not IS_BSP_FOUND:
-                if re.match(r'^Used platform', line):
+                if re.match(r'Used platform', line):
                     IS_BSP_FOUND = True
                     COLS = [0,str.find(line, 'Version'), str.find(line, 'Path')]
                     break
