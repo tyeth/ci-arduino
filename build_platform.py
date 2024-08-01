@@ -31,10 +31,6 @@ if "--build_timeout" in sys.argv:
 
 # optional wippersnapper argument to generate a dependencies header file
 PRINT_DEPENDENCIES_AS_HEADER = False
-# if "--print_dependencies_as_header" in sys.argv:
-#     PRINT_DEPENDENCIES_AS_HEADER = True
-#     sys.argv.remove("--print_dependencies_as_header")
-#
 INCLUDE_PRINT_DEPENDENCIES_HEADER = False
 if "--include_print_dependencies_header" in sys.argv:
     INCLUDE_PRINT_DEPENDENCIES_HEADER = True
@@ -391,9 +387,15 @@ def extract_dependencies(output):
     return dependencies
 
 def write_dependencies_to_header(dependencies, output_file):
+    # header file
     with open(output_file, 'w') as f:
         f.write('#ifndef PROJECT_DEPENDENCIES_H\n')
         f.write('#define PROJECT_DEPENDENCIES_H\n\n')
+        f.write('extern const char* project_dependencies;\n\n')
+        f.write('#endif // PROJECT_DEPENDENCIES_H\n')
+    # cpp file
+    with open(re.sub(r'\.h$','.cpp'), 'w') as f:
+        f.write('#include "print_dependencies.h"\n\n')
         f.write('const char* project_dependencies = R"(\n')
         
         f.write('Libraries and Versions:\n')
@@ -405,7 +407,6 @@ def write_dependencies_to_header(dependencies, output_file):
             f.write(f'Platform: {plat[0].strip()}, Version: {plat[1].strip()}\n')
         
         f.write(')";\n\n')
-        f.write('#endif // PROJECT_DEPENDENCIES_H\n')
 
 def test_examples_in_folder(platform, folderpath):
     global success, BUILD_TIMEOUT, popen_timeout, BUILD_WALL, BUILD_WARN, PRINT_DEPENDENCIES_AS_HEADER, INCLUDE_PRINT_DEPENDENCIES_HEADER, IS_LEARNING_SYS, BUILD_DIR
@@ -470,7 +471,7 @@ def test_examples_in_folder(platform, folderpath):
             cmd.append('--no-color')
         elif INCLUDE_PRINT_DEPENDENCIES_HEADER:
             cmd.append('--build-property')
-            cmd.append('"build.extra_flags=\'-DPRINT_DEPENDENCIES\'"')
+            cmd.append('"compiler.cpp.extra_flags=-DPRINT_DEPENDENCIES"')
             cmd.append('--verbose')
 
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
